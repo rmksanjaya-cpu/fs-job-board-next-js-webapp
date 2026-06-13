@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Job Board Student in the Software Field",
-  description: "Job Board for Students in the Software Field",
+  title: "Vaskara Job Board | Software Internships & Co-ops for Students",
+  description: "Vaskara connects computer science and software engineering students with vetted tech internships, co-ops, and entry-level developer roles.",
 };
 
 export default function RootLayout({
