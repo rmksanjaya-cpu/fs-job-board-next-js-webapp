@@ -45,13 +45,13 @@ export default function Header() {
           {/* Desktop Navigation */}
           <nav className="hidden md:flex items-center gap-8">
             <Link
-              href="#jobs"
+              href="/#jobs"
               className="text-sm font-medium text-navy-600 dark:text-navy-300 hover:text-brand-blue dark:hover:text-brand-sky transition-colors"
             >
               Find Jobs
             </Link>
             <Link
-              href="#features"
+              href="/#features"
               className="text-sm font-medium text-navy-600 dark:text-navy-300 hover:text-brand-blue dark:hover:text-brand-sky transition-colors"
             >
               Why Vaskara
@@ -129,14 +129,14 @@ export default function Header() {
         <div className="md:hidden animate-in slide-in-from-top-4 duration-200" id="mobile-menu">
           <div className="space-y-1 px-4 pb-4 pt-2 border-t border-border bg-background">
             <Link
-              href="#jobs"
+              href="/#jobs"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block rounded-md px-3 py-2 text-base font-medium text-navy-700 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-850 hover:text-brand-blue"
             >
               Find Jobs
             </Link>
             <Link
-              href="#features"
+              href="/#features"
               onClick={() => setIsMobileMenuOpen(false)}
               className="block rounded-md px-3 py-2 text-base font-medium text-navy-700 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-850 hover:text-brand-blue"
             >
