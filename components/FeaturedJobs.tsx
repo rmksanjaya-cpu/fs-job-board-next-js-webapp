@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { type Job, JOBS_DATA } from "@/data/jobs";
 import JobCard from "@/components/JobCard";
+import Link from "next/link";
 
 const JOBS_PER_PAGE = 6;
 
@@ -119,7 +120,7 @@ export default function FeaturedJobs() {
         
         {/* View All CTA */}
         <div className="mt-12 text-center">
-          <button className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-navy-50 dark:hover:bg-navy-900 px-6 py-3 text-sm font-bold text-navy-800 dark:text-navy-200 transition-all cursor-pointer hover:border-brand-blue/30 hover:text-brand-blue">
+          <Link href="/jobs" className="inline-flex items-center gap-2 rounded-full border border-border bg-card hover:bg-navy-50 dark:hover:bg-navy-900 px-6 py-3 text-sm font-bold text-navy-800 dark:text-navy-200 transition-all cursor-pointer hover:border-brand-blue/30 hover:text-brand-blue">
             <span>Explore All 1,200+ Internships</span>
             <svg
               className="h-4 w-4"
@@ -130,7 +131,7 @@ export default function FeaturedJobs() {
             >
               <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 8.25 21 12m0 0-3.75 3.75M21 12H3" />
             </svg>
-          </button>
+          </Link>
         </div>
 
       </div>

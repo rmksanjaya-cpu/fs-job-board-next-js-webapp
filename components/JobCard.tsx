@@ -26,9 +26,14 @@ export default function JobCard({ job }: JobCardProps) {
               </Link>
             </div>
           </div>
-          <span className="rounded-full bg-navy-50 dark:bg-navy-900 border border-border/40 px-2.5 py-0.5 text-[10px] font-bold text-navy-600 dark:text-navy-300">
-            {job.type}
-          </span>
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
+            <span className="rounded-full bg-navy-50 dark:bg-navy-900 border border-border/40 px-2.5 py-0.5 text-[10px] font-bold text-navy-600 dark:text-navy-300">
+              {job.type}
+            </span>
+            <span className="rounded-full bg-brand-blue/5 border border-brand-blue/20 dark:border-brand-sky/20 px-2.5 py-0.5 text-[10px] font-bold text-brand-blue dark:text-brand-sky">
+              {job.term}
+            </span>
+          </div>
         </div>
 
         {/* Location and Salary metadata */}

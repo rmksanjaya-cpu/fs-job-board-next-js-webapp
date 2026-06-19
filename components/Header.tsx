@@ -56,18 +56,7 @@ export default function Header() {
             >
               Why Vaskara
             </Link>
-            <Link
-              href="#"
-              className="text-sm font-medium text-navy-600 dark:text-navy-300 hover:text-brand-blue dark:hover:text-brand-sky transition-colors"
-            >
-              For Employers
-            </Link>
-            <Link
-              href="#"
-              className="text-sm font-medium text-navy-600 dark:text-navy-300 hover:text-brand-blue dark:hover:text-brand-sky transition-colors"
-            >
-              Resources
-            </Link>
+
           </nav>
 
           {/* Desktop Action Buttons */}
@@ -142,20 +131,7 @@ export default function Header() {
             >
               Why Vaskara
             </Link>
-            <Link
-              href="#"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-medium text-navy-700 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-850 hover:text-brand-blue"
-            >
-              For Employers
-            </Link>
-            <Link
-              href="#"
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="block rounded-md px-3 py-2 text-base font-medium text-navy-700 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-850 hover:text-brand-blue"
-            >
-              Resources
-            </Link>
+
             <div className="border-t border-border pt-4 pb-2">
               <Link
                 href="#"

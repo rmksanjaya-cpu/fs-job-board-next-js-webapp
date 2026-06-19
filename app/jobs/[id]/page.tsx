@@ -10,13 +10,13 @@ interface PageProps {
 
 export async function generateStaticParams() {
   return JOBS_DATA.map((job) => ({
-    id: String(job.id),
+    id: job.id,
   }));
 }
 
 export default async function JobDetailPage({ params }: PageProps) {
   const resolvedParams = await params;
-  const job = JOBS_DATA.find((j) => String(j.id) === resolvedParams.id);
+  const job = JOBS_DATA.find((j) => j.id === resolvedParams.id);
 
   if (!job) {
     notFound();
@@ -172,6 +172,18 @@ export default async function JobDetailPage({ params }: PageProps) {
                     <div>
                       <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wide">Base Pay</h4>
                       <p className="text-sm font-bold text-brand-blue dark:text-brand-sky mt-0.5">{job.salary}</p>
+                    </div>
+                  </div>
+
+
+                  {/* Placement Term */}
+                  <div className="flex items-start gap-3">
+                    <svg className="h-5 w-5 text-navy-400 mt-0.5 shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                    </svg>
+                    <div>
+                      <h4 className="text-xs font-bold text-navy-500 uppercase tracking-wide">Placement Term</h4>
+                      <p className="text-sm font-semibold text-brand-blue dark:text-brand-sky mt-0.5">{job.term}</p>
                     </div>
                   </div>
 

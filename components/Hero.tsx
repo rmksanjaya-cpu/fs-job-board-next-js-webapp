@@ -1,15 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import CustomDropdown from "@/components/CustomDropdown";
+import { JOBS_DATA } from "@/data/jobs";
 
 export default function Hero() {
+  const router = useRouter();
   const [role, setRole] = useState("");
   const [location, setLocation] = useState("");
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Searching for:", { role, location });
+    router.push(`/jobs?search=${encodeURIComponent(role)}&location=${encodeURIComponent(location)}`);
   };
+
+  const allLocations = useMemo(() => {
+    const locationsSet = new Set<string>();
+    JOBS_DATA.forEach((job) => {
+      locationsSet.add(job.location);
+    });
+    return Array.from(locationsSet).sort();
+  }, []);
 
   const trendingTags = ["React", "Internship", "Remote", "Go", "Python", "Full Stack"];
 
@@ -73,23 +85,27 @@ export default function Hero() {
                 </div>
 
                 {/* Location field */}
-                <div className="flex flex-1 items-center px-3 py-2 md:pl-5">
-                  <svg
-                    className="h-5 w-5 text-navy-400 shrink-0"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="2"
-                    stroke="currentColor"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25s-7.5-4.108-7.5-11.25a7.5 7.5 0 1 1 15 0Z" />
-                  </svg>
-                  <input
-                    type="text"
+                <div className="flex flex-1 items-center px-3 py-2 md:pl-5 min-w-[200px]">
+                  <CustomDropdown
+                    options={allLocations}
+                    selected={location}
+                    onChange={(val) => setLocation(val)}
                     placeholder="Remote, city, or hybrid..."
-                    value={location}
-                    onChange={(e) => setLocation(e.target.value)}
-                    className="ml-3 w-full bg-transparent text-sm text-navy-900 dark:text-white placeholder:text-navy-400 outline-none"
+                    isLocation={true}
+                    searchable={true}
+                    minimalist={true}
+                    leftIcon={
+                      <svg
+                        className="h-5 w-5 text-navy-400 shrink-0"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth="2"
+                        stroke="currentColor"
+                      >
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25s-7.5-4.108-7.5-11.25a7.5 7.5 0 1 1 15 0Z" />
+                      </svg>
+                    }
                   />
                 </div>
 

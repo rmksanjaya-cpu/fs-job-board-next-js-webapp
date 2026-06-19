@@ -1,11 +1,12 @@
 export interface Job {
-  id: number;
+  id: string;
   title: string;
   company: string;
   logoText: string;
   logoBg: string;
   location: string;
   type: string; // e.g. Co-op, Internship
+  term: string; // e.g. Summer 2026, Fall 2026, Winter 2027
   salary: string;
   posted: string;
   tags: string[];
@@ -16,15 +17,41 @@ export interface Job {
   aboutCompany: string;
 }
 
+export function generateJobSlug(title: string, company: string, existingSlugs: string[] = []): string {
+  const cleanTitle = title
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/[-\s]+/g, "-");
+  
+  const cleanCompany = company
+    .toLowerCase()
+    .replace(/[^\w\s-]/g, "")
+    .trim()
+    .replace(/[-\s]+/g, "-");
+
+  let baseSlug = `${cleanTitle}-${cleanCompany}`;
+  let slug = baseSlug;
+  let counter = 1;
+
+  while (existingSlugs.includes(slug)) {
+    slug = `${baseSlug}-${counter}`;
+    counter++;
+  }
+
+  return slug;
+}
+
 export const JOBS_DATA: Job[] = [
   {
-    id: 1,
+    id: "frontend-developer-intern-vercel",
     title: "Frontend Developer Intern",
     company: "Vercel",
     logoText: "V",
     logoBg: "bg-black text-white dark:bg-white dark:text-black",
     location: "Remote (Global)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$50 - $60 / hr",
     posted: "1 day ago",
     tags: ["React", "Next.js", "TypeScript", "Tailwind"],
@@ -47,13 +74,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Vercel is the platform for frontend developers, providing the speed and reliability needed to deploy high-performance websites and modern web applications globally."
   },
   {
-    id: 2,
+    id: "backend-engineer-co-op-supabase",
     title: "Backend Engineer Co-op",
     company: "Supabase",
     logoText: "S",
     logoBg: "bg-emerald-600 text-white",
     location: "Remote",
     type: "Co-op",
+    term: "Fall 2026",
     salary: "$45 - $55 / hr",
     posted: "2 days ago",
     tags: ["Go", "PostgreSQL", "Rust", "APIs"],
@@ -76,13 +104,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Supabase is an open-source Firebase alternative, built on top of Postgres, offering database, authentication, instant APIs, edge functions, and real-time subscriptions."
   },
   {
-    id: 3,
+    id: "software-engineer-intern-stripe",
     title: "Software Engineer Intern",
     company: "Stripe",
     logoText: "S",
     logoBg: "bg-indigo-600 text-white",
     location: "San Francisco, CA (Hybrid)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$55 - $65 / hr",
     posted: "Today",
     tags: ["Ruby", "React", "REST APIs", "Stripe API"],
@@ -105,13 +134,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Stripe is a financial infrastructure platform for the internet. Millions of companies use Stripe to accept payments, grow their revenue, and accelerate new business opportunities."
   },
   {
-    id: 4,
+    id: "ai-engineer-intern-hugging-face",
     title: "AI Engineer Intern",
     company: "Hugging Face",
     logoText: "H",
     logoBg: "bg-yellow-400 text-black",
     location: "Remote (US/EU)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$60 - $75 / hr",
     posted: "3 days ago",
     tags: ["Python", "PyTorch", "Transformers", "LLMs"],
@@ -134,13 +164,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Hugging Face is the hub for AI and ML community. We build open-source tools and platforms to democratize machine learning, hosting models, datasets, and apps."
   },
   {
-    id: 5,
+    id: "cloud-infrastructure-co-op-hashicorp",
     title: "Cloud & Infrastructure Co-op",
     company: "HashiCorp",
     logoText: "H",
     logoBg: "bg-red-600 text-white",
     location: "Austin, TX (Hybrid)",
     type: "Co-op",
+    term: "Winter 2027",
     salary: "$48 - $58 / hr",
     posted: "5 days ago",
     tags: ["Go", "Terraform", "Docker", "AWS"],
@@ -163,13 +194,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "HashiCorp provides infrastructure automation software for multi-cloud environments, enabling enterprises to provision, secure, run, and connect cloud systems."
   },
   {
-    id: 6,
+    id: "ios-mobile-intern-airbnb",
     title: "iOS Mobile Intern",
     company: "Airbnb",
     logoText: "A",
     logoBg: "bg-rose-500 text-white",
     location: "San Francisco, CA (Hybrid)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$52 - $62 / hr",
     posted: "4 days ago",
     tags: ["Swift", "SwiftUI", "React Native", "iOS"],
@@ -192,13 +224,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Airbnb is a global platform that connects hosts and travelers, offering unique accommodation and experiences across almost every country in the world."
   },
   {
-    id: 7,
+    id: "design-systems-frontend-intern-figma",
     title: "Design Systems & Frontend Intern",
     company: "Figma",
     logoText: "F",
     logoBg: "bg-orange-500 text-white",
     location: "New York, NY (Hybrid)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$54 - $64 / hr",
     posted: "Just now",
     tags: ["React", "TypeScript", "Figma API", "WebAssembly"],
@@ -221,13 +254,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Figma is a collaborative web application for interface design. It enables real-time collaboration on design files, prototypes, and developer handoffs."
   },
   {
-    id: 8,
+    id: "research-engineer-co-op-openai",
     title: "Research Engineer Co-op",
     company: "OpenAI",
     logoText: "O",
     logoBg: "bg-teal-700 text-white",
     location: "San Francisco, CA (Hybrid)",
     type: "Co-op",
+    term: "Winter 2027",
     salary: "$65 - $80 / hr",
     posted: "1 day ago",
     tags: ["Python", "C++", "PyTorch", "Reinforcement Learning"],
@@ -250,13 +284,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "OpenAI is an AI research and deployment company. Our mission is to ensure that artificial general intelligence benefits all of humanity."
   },
   {
-    id: 9,
+    id: "site-reliability-engineer-intern-datadog",
     title: "Site Reliability Engineer Intern",
     company: "Datadog",
     logoText: "D",
     logoBg: "bg-purple-600 text-white",
     location: "Boston, MA (Hybrid)",
     type: "Internship",
+    term: "Fall 2026",
     salary: "$46 - $56 / hr",
     posted: "6 days ago",
     tags: ["Go", "Kubernetes", "Linux", "Monitoring"],
@@ -279,13 +314,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Datadog is a monitoring service for cloud-scale applications, providing monitoring of servers, databases, tools, and services, through a SaaS-based data analytics platform."
   },
   {
-    id: 10,
+    id: "android-engineer-intern-netflix",
     title: "Android Engineer Intern",
     company: "Netflix",
     logoText: "N",
     logoBg: "bg-red-700 text-white",
     location: "Los Gatos, CA",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$58 - $68 / hr",
     posted: "3 days ago",
     tags: ["Kotlin", "Jetpack Compose", "Java", "ExoPlayer"],
@@ -308,13 +344,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Netflix is a global streaming entertainment service with over 200 million paid memberships in over 190 countries, delivering TV series, documentaries, and feature films."
   },
   {
-    id: 11,
+    id: "auth-frontend-intern-clerk",
     title: "Auth & Frontend Intern",
     company: "Clerk",
     logoText: "C",
     logoBg: "bg-blue-600 text-white",
     location: "Remote (Global)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$48 - $58 / hr",
     posted: "4 days ago",
     tags: ["React", "Next.js", "Authentication", "TypeScript"],
@@ -337,13 +374,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Clerk is the complete user management and authentication suite for React, Next.js, and the modern web, allowing developers to set up authentication in minutes."
   },
   {
-    id: 12,
+    id: "database-systems-co-op-planetscale",
     title: "Database Systems Co-op",
     company: "PlanetScale",
     logoText: "P",
     logoBg: "bg-slate-900 text-white dark:bg-white dark:text-slate-950",
     location: "Remote (US)",
     type: "Co-op",
+    term: "Winter 2027",
     salary: "$50 - $60 / hr",
     posted: "5 days ago",
     tags: ["Go", "MySQL", "Vitess", "SQL"],
@@ -366,13 +404,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "PlanetScale is a serverless MySQL database platform powered by Vitess. We allow teams to scale databases horizontally without managing complex server clusters."
   },
   {
-    id: 13,
+    id: "ai-safety-engineer-intern-anthropic",
     title: "AI Safety Engineer Intern",
     company: "Anthropic",
     logoText: "A",
     logoBg: "bg-amber-800 text-white",
     location: "San Francisco, CA (Hybrid)",
     type: "Internship",
+    term: "Summer 2026",
     salary: "$62 - $77 / hr",
     posted: "Today",
     tags: ["Python", "PyTorch", "Alignment", "LLM Evaluation"],
@@ -395,13 +434,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Anthropic is an AI safety and research company that builds reliable, beneficial, and controllable AI systems like Claude."
   },
   {
-    id: 14,
+    id: "cloud-engineer-intern-pulumi",
     title: "Cloud Engineer Intern",
     company: "Pulumi",
     logoText: "P",
     logoBg: "bg-violet-600 text-white",
     location: "Seattle, WA (Hybrid)",
     type: "Internship",
+    term: "Fall 2026",
     salary: "$47 - $57 / hr",
     posted: "1 week ago",
     tags: ["TypeScript", "Go", "Pulumi", "AWS/GCP"],
@@ -424,13 +464,14 @@ export const JOBS_DATA: Job[] = [
     aboutCompany: "Pulumi is an Infrastructure-as-Code platform that enables engineers to use standard programming languages to build, deploy, and manage cloud services."
   },
   {
-    id: 15,
+    id: "mobile-product-engineer-co-op-uber",
     title: "Mobile Product Engineer Co-op",
     company: "Uber",
     logoText: "U",
     logoBg: "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900",
     location: "San Francisco, CA",
     type: "Co-op",
+    term: "Fall 2026",
     salary: "$54 - $64 / hr",
     posted: "2 days ago",
     tags: ["Swift", "Kotlin", "React Native", "GraphQL"],
