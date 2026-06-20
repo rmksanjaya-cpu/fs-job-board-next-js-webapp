@@ -2,8 +2,14 @@ import Header from "@/components/Header";
 import Hero from "@/components/Hero";
 import Stats from "@/components/Stats";
 import Features from "@/components/Features";
-import FeaturedJobs from "@/components/FeaturedJobs";
 import Footer from "@/components/Footer";
+import dynamic from "next/dynamic";
+import FeaturedJobsSkeleton from "@/components/FeaturedJobsSkeleton";
+
+const FeaturedJobs = dynamic(() => import("@/components/FeaturedJobs"), {
+  loading: () => <FeaturedJobsSkeleton />,
+  ssr: true,
+});
 
 export default function Home() {
   return (
@@ -19,4 +25,5 @@ export default function Home() {
     </div>
   );
 }
+
 

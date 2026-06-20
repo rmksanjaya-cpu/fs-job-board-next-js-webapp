@@ -1,27 +1,78 @@
 "use client";
 
-import { useState } from "react";
-import { type Job, JOBS_DATA } from "@/data/jobs";
+import { useState, useEffect } from "react";
+import { type Job } from "@/data/jobs";
 import JobCard from "@/components/JobCard";
 import Link from "next/link";
 
 const JOBS_PER_PAGE = 6;
 
+function JobCardSkeleton() {
+  return (
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-sm animate-pulse space-y-4">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-2xl bg-navy-100 dark:bg-navy-800" />
+          <div className="space-y-2">
+            <div className="h-4 w-32 rounded bg-navy-100 dark:bg-navy-800" />
+            <div className="h-3 w-20 rounded bg-navy-100 dark:bg-navy-800" />
+          </div>
+        </div>
+        <div className="h-5 w-16 rounded bg-navy-100 dark:bg-navy-800" />
+      </div>
+      <div className="h-3 w-full rounded bg-navy-100 dark:bg-navy-800" />
+      <div className="h-3 w-2/3 rounded bg-navy-100 dark:bg-navy-800" />
+      <div className="flex items-center gap-2 pt-2">
+        <div className="h-6 w-16 rounded-full bg-navy-100 dark:bg-navy-800" />
+        <div className="h-6 w-20 rounded-full bg-navy-100 dark:bg-navy-800" />
+        <div className="h-6 w-14 rounded-full bg-navy-100 dark:bg-navy-800" />
+      </div>
+    </div>
+  );
+}
+
 export default function FeaturedJobs() {
   const [selectedFilter, setSelectedFilter] = useState<string>("all");
   const [currentPage, setCurrentPage] = useState<number>(1);
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [totalPages, setTotalPages] = useState<number>(1);
 
-  const filteredJobs = JOBS_DATA.filter((job) => {
-    if (selectedFilter === "all") return true;
-    return job.category === selectedFilter;
-  });
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchFeaturedJobs() {
+      setIsLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+        if (selectedFilter !== "all") {
+          queryParams.set("category", selectedFilter);
+        }
+        queryParams.set("page", String(currentPage));
+        queryParams.set("limit", String(JOBS_PER_PAGE));
 
-  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
+        const res = await fetch(`/api/jobs?${queryParams.toString()}`);
+        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const data = await res.json();
 
-  const paginatedJobs = filteredJobs.slice(
-    (currentPage - 1) * JOBS_PER_PAGE,
-    currentPage * JOBS_PER_PAGE
-  );
+        if (isMounted) {
+          setJobs(data.jobs);
+          setTotalPages(data.totalPages);
+        }
+      } catch (err) {
+        console.error("Error loading featured jobs:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    }
+
+    fetchFeaturedJobs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [selectedFilter, currentPage]);
 
   const handleFilterChange = (filter: string) => {
     setSelectedFilter(filter);
@@ -72,13 +123,23 @@ export default function FeaturedJobs() {
 
         {/* Jobs List Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {paginatedJobs.map((job) => (
-            <JobCard key={job.id} job={job} />
-          ))}
+          {isLoading ? (
+            Array.from({ length: 6 }).map((_, idx) => (
+              <JobCardSkeleton key={idx} />
+            ))
+          ) : jobs.length > 0 ? (
+            jobs.map((job) => (
+              <JobCard key={job.id} job={job} />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-10 text-navy-500">
+              No featured jobs available.
+            </div>
+          )}
         </div>
 
         {/* Pagination Controls */}
-        {totalPages > 1 && (
+        {!isLoading && totalPages > 1 && (
           <div className="mt-12 flex items-center justify-center gap-2">
             <button
               onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}

@@ -1,27 +1,40 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import CustomDropdown from "@/components/CustomDropdown";
-import { JOBS_DATA } from "@/data/jobs";
 
 export default function Hero() {
   const router = useRouter();
   const [role, setRole] = useState("");
   const [location, setLocation] = useState("");
+  const [allLocations, setAllLocations] = useState<string[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchLocations() {
+      try {
+        const res = await fetch("/api/jobs?limit=1");
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted && data.allLocations) {
+            setAllLocations(data.allLocations);
+          }
+        }
+      } catch (err) {
+        console.error("Error fetching locations in Hero component:", err);
+      }
+    }
+    fetchLocations();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     router.push(`/jobs?search=${encodeURIComponent(role)}&location=${encodeURIComponent(location)}`);
   };
-
-  const allLocations = useMemo(() => {
-    const locationsSet = new Set<string>();
-    JOBS_DATA.forEach((job) => {
-      locationsSet.add(job.location);
-    });
-    return Array.from(locationsSet).sort();
-  }, []);
 
   const trendingTags = ["React", "Internship", "Remote", "Go", "Python", "Full Stack"];
 

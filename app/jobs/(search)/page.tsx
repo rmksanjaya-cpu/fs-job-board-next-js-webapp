@@ -5,16 +5,41 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import JobCard from "@/components/JobCard";
 import CustomDropdown from "@/components/CustomDropdown";
-import { JOBS_DATA } from "@/data/jobs";
+import { type Job } from "@/data/jobs";
 import { useSearchParams } from "next/navigation";
 
 const JOBS_PER_PAGE = 6;
+
+function JobCardSkeleton() {
+  return (
+    <div className="rounded-3xl border border-border bg-card p-6 shadow-sm animate-pulse space-y-4">
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-12 w-12 rounded-2xl bg-navy-100 dark:bg-navy-800" />
+          <div className="space-y-2">
+            <div className="h-4 w-32 rounded bg-navy-100 dark:bg-navy-800" />
+            <div className="h-3 w-20 rounded bg-navy-100 dark:bg-navy-800" />
+          </div>
+        </div>
+        <div className="h-5 w-16 rounded bg-navy-100 dark:bg-navy-800" />
+      </div>
+      <div className="h-3 w-full rounded bg-navy-100 dark:bg-navy-800" />
+      <div className="h-3 w-2/3 rounded bg-navy-100 dark:bg-navy-800" />
+      <div className="flex items-center gap-2 pt-2">
+        <div className="h-6 w-16 rounded-full bg-navy-100 dark:bg-navy-800" />
+        <div className="h-6 w-20 rounded-full bg-navy-100 dark:bg-navy-800" />
+        <div className="h-6 w-14 rounded-full bg-navy-100 dark:bg-navy-800" />
+      </div>
+    </div>
+  );
+}
 
 function JobsContent() {
   const searchParams = useSearchParams();
 
   // Filter States
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchVal, setSearchVal] = useState("");
+  const [debouncedSearchQuery, setDebouncedSearchQuery] = useState("");
   const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
   const [selectedLocations, setSelectedLocations] = useState<string[]>([]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
@@ -24,123 +49,88 @@ function JobsContent() {
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Dynamically extract all unique tags from JOBS_DATA for filter buttons
-  const allTags = useMemo(() => {
-    const tagsSet = new Set<string>();
-    JOBS_DATA.forEach((job) => {
-      job.tags.forEach((tag) => tagsSet.add(tag));
-    });
-    return Array.from(tagsSet).sort();
-  }, []);
+  // Dynamic filter options loaded from API
+  const [allLocations, setAllLocations] = useState<string[]>([]);
+  const [allTerms, setAllTerms] = useState<string[]>([]);
+  const [allTags, setAllTags] = useState<string[]>([]);
 
-  // Dynamically extract all unique locations from JOBS_DATA
-  const allLocations = useMemo(() => {
-    const locationsSet = new Set<string>();
-    JOBS_DATA.forEach((job) => {
-      locationsSet.add(job.location);
-    });
-    return Array.from(locationsSet).sort();
-  }, []);
+  // Jobs state from API
+  const [jobs, setJobs] = useState<Job[]>([]);
+  const [totalJobs, setTotalJobs] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Dynamically extract all unique terms from JOBS_DATA
-  const allTerms = useMemo(() => {
-    const termsSet = new Set<string>();
-    JOBS_DATA.forEach((job) => {
-      termsSet.add(job.term);
-    });
-    return Array.from(termsSet).sort();
-  }, []);
-
-  // Parse URL search parameters on mount / search params changes
+  // Debounce search query input to prevent excessive API requests
   useEffect(() => {
-    const searchVal = searchParams.get("search") || "";
+    const handler = setTimeout(() => {
+      setDebouncedSearchQuery(searchVal);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [searchVal]);
+
+  // Parse URL search parameters on mount
+  useEffect(() => {
+    const searchValParam = searchParams.get("search") || "";
     const locVal = searchParams.get("location") || "";
     
-    if (searchVal) {
-      setSearchQuery(searchVal);
+    if (searchValParam) {
+      setSearchVal(searchValParam);
+      setDebouncedSearchQuery(searchValParam);
     }
     
     if (locVal) {
-      // Find matching locations from the dynamic list
-      const matchingLocs = allLocations.filter(loc => 
-        loc.toLowerCase().includes(locVal.toLowerCase())
-      );
-      if (matchingLocs.length > 0) {
-        setSelectedLocations(matchingLocs);
-      } else {
-        setSelectedLocations([locVal]);
+      setSelectedLocations([locVal]);
+    }
+  }, [searchParams]);
+
+  // Fetch jobs dynamically from backend API based on state changes
+  useEffect(() => {
+    let isMounted = true;
+    async function fetchJobs() {
+      setIsLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+        if (debouncedSearchQuery) queryParams.set("search", debouncedSearchQuery);
+        if (selectedTypes.length > 0) queryParams.set("types", selectedTypes.join(","));
+        if (selectedLocations.length > 0) queryParams.set("locations", selectedLocations.join(","));
+        if (selectedCategories.length > 0) queryParams.set("categories", selectedCategories.join(","));
+        if (selectedTags.length > 0) queryParams.set("tags", selectedTags.join(","));
+        if (selectedTerms.length > 0) queryParams.set("terms", selectedTerms.join(","));
+        queryParams.set("page", String(currentPage));
+        queryParams.set("limit", String(JOBS_PER_PAGE));
+
+        const res = await fetch(`/api/jobs?${queryParams.toString()}`);
+        if (!res.ok) throw new Error("Failed to fetch jobs");
+        const data = await res.json();
+        
+        if (isMounted) {
+          setJobs(data.jobs);
+          setTotalJobs(data.total);
+          setTotalPages(data.totalPages);
+          if (data.allLocations) setAllLocations(data.allLocations);
+          if (data.allTerms) setAllTerms(data.allTerms);
+          if (data.allTags) setAllTags(data.allTags);
+        }
+      } catch (err) {
+        console.error("Error fetching jobs:", err);
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
       }
     }
-  }, [searchParams, allLocations]);
 
-  // Filter Logic
-  const filteredJobs = useMemo(() => {
-    return JOBS_DATA.filter((job) => {
-      // 1. Search Query (Matches title, company or tags)
-      if (searchQuery.trim() !== "") {
-        const query = searchQuery.toLowerCase();
-        const matchesTitle = job.title.toLowerCase().includes(query);
-        const matchesCompany = job.company.toLowerCase().includes(query);
-        const matchesTags = job.tags.some(t => t.toLowerCase().includes(query));
-        if (!matchesTitle && !matchesCompany && !matchesTags) {
-          return false;
-        }
-      }
+    fetchJobs();
 
-      // 2. Job Type (Co-op, Internship)
-      if (selectedTypes.length > 0) {
-        if (!selectedTypes.includes(job.type)) {
-          return false;
-        }
-      }
-
-      // 3. Location (matches any selected exact dynamic locations)
-      if (selectedLocations.length > 0) {
-        if (!selectedLocations.includes(job.location)) {
-          return false;
-        }
-      }
-
-      // 4. Category
-      if (selectedCategories.length > 0) {
-        if (!selectedCategories.includes(job.category)) {
-          return false;
-        }
-      }
-
-      // 5. Skills/Tags
-      if (selectedTags.length > 0) {
-        // Must contain all selected tags
-        const hasAllSelectedTags = selectedTags.every((tag) => job.tags.includes(tag));
-        if (!hasAllSelectedTags) {
-          return false;
-        }
-      }
-
-      // 6. Placement Term
-      if (selectedTerms.length > 0) {
-        if (!selectedTerms.includes(job.term)) {
-          return false;
-        }
-      }
-
-      return true;
-    });
-  }, [searchQuery, selectedTypes, selectedLocations, selectedCategories, selectedTags, selectedTerms]);
-
-  // Pagination Logic
-  const totalPages = Math.ceil(filteredJobs.length / JOBS_PER_PAGE);
-  const paginatedJobs = useMemo(() => {
-    return filteredJobs.slice(
-      (currentPage - 1) * JOBS_PER_PAGE,
-      currentPage * JOBS_PER_PAGE
-    );
-  }, [filteredJobs, currentPage]);
+    return () => {
+      isMounted = false;
+    };
+  }, [debouncedSearchQuery, selectedTypes, selectedLocations, selectedCategories, selectedTags, selectedTerms, currentPage]);
 
   // Handlers (which reset page to 1)
   const handleSearchChange = (val: string) => {
-    setSearchQuery(val);
-    setCurrentPage(1);
+    setSearchVal(val);
   };
 
   const toggleTag = (tag: string) => {
@@ -151,7 +141,8 @@ function JobsContent() {
   };
 
   const clearAllFilters = () => {
-    setSearchQuery("");
+    setSearchVal("");
+    setDebouncedSearchQuery("");
     setSelectedTypes([]);
     setSelectedLocations([]);
     setSelectedCategories([]);
@@ -202,7 +193,7 @@ function JobsContent() {
                   <input
                     type="text"
                     placeholder="Title, company, or tech..."
-                    value={searchQuery}
+                    value={searchVal}
                     onChange={(e) => handleSearchChange(e.target.value)}
                     className="w-full rounded-2xl border border-border bg-background/50 hover:bg-background focus:bg-background px-4 py-2.5 pl-10 text-sm text-navy-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-brand-blue/30 focus:border-brand-blue transition-all"
                   />
@@ -341,9 +332,9 @@ function JobsContent() {
               {/* Header Stats */}
               <div className="flex items-center justify-between border-b border-border/60 pb-4">
                 <span className="text-xs font-bold text-navy-500 dark:text-navy-400 uppercase tracking-wider">
-                  {filteredJobs.length} {filteredJobs.length === 1 ? "Job" : "Jobs"} Found
+                  {isLoading ? "Searching..." : `${totalJobs} ${totalJobs === 1 ? "Job" : "Jobs"} Found`}
                 </span>
-                {filteredJobs.length > 0 && (
+                {!isLoading && totalJobs > 0 && (
                   <span className="text-xs font-medium text-navy-400">
                     Showing Page {currentPage} of {totalPages || 1}
                   </span>
@@ -351,9 +342,15 @@ function JobsContent() {
               </div>
 
               {/* Job Grid / List */}
-              {paginatedJobs.length > 0 ? (
+              {isLoading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {paginatedJobs.map((job) => (
+                  {Array.from({ length: 6 }).map((_, idx) => (
+                    <JobCardSkeleton key={idx} />
+                  ))}
+                </div>
+              ) : jobs.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {jobs.map((job) => (
                     <JobCard key={job.id} job={job} />
                   ))}
                 </div>
@@ -382,7 +379,7 @@ function JobsContent() {
               )}
 
               {/* Pagination Controls */}
-              {totalPages > 1 && (
+              {!isLoading && totalPages > 1 && (
                 <div className="mt-12 flex items-center justify-center gap-2 pt-6 border-t border-border/30">
                   <button
                     onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
@@ -452,3 +449,4 @@ export default function JobsPage() {
     </Suspense>
   );
 }
+
